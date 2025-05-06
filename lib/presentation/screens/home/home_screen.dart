@@ -14,7 +14,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final isLoading = false; // sau có thể fetch data rồi setState về false
 
-    mq = MediaQuery.of(context).size; // 👈 Gán giá trị thực tế tại đây
+    // mq = MediaQuery.of(context).size; // 👈 Gán giá trị thực tế tại đây
     Animate.restartOnHotReload = true;
 
     return SingleChildScrollView(

@@ -1,3 +1,4 @@
+import 'package:ez_ai_app/presentation/widgets/tooltip/menu_tooltip.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -98,11 +99,7 @@ class TitleHistoryItem extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    SvgPicture.asset(
-                      'assets/icons/ic_more_vert.svg',
-                      width: 20,
-                      height: 20,
-                    ),
+                    const MenuTooltip()
                   ],
                 ),
               ],

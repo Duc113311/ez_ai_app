@@ -1,8 +1,11 @@
 import 'package:ez_ai_app/data/models/quick-action/action_item.dart';
+import 'package:ez_ai_app/presentation/controllers/history/history_controller.dart';
 import 'package:ez_ai_app/presentation/widgets/dropdown/ai_dropdown_selector.dart';
+import 'package:ez_ai_app/presentation/widgets/dropdown/date_dropdown_start_end.dart';
 import 'package:ez_ai_app/presentation/widgets/history/title_history_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:get/get.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -12,38 +15,39 @@ class HistoryScreen extends StatefulWidget {
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
-  List<ChatHistoryModel> historyList = [
-    ChatHistoryModel(
-      aiName: 'ChatGPT',
-      iconPath: 'assets/icons/ic_chatgpt.svg',
-      title: 'Tell a bedtime story for the baby',
-      subTitle: 'Snow White and the Seven Dwarfs. Once upon a time...',
-      dateTime: '07 Mar • 10:45 AM',
-      cost: '-100 Credits',
-      isStarred: true,
-    ),
-    ChatHistoryModel(
-      aiName: 'Gemini',
-      iconPath: 'assets/icons/ic_gemeni.svg',
-      title: 'Write a product description',
-      subTitle: 'Amazing phone with long battery...',
-      dateTime: '07 Mar • 10:20 AM',
-      cost: '-50 Credits',
-    ),
-    // Add more if needed
-  ];
+  final controller = Get.find<HistoryController>();
 
-  void toggleStar(int index) {
-    setState(() {
-      historyList[index].isStarred = !historyList[index].isStarred;
-    });
+  DateTime? _startDate;
+  DateTime? _endDate;
+  bool _isDateFilterActive = false;
+
+  Future<void> _handleOpenDatePicker() async {
+    final result = await openDateRangePicker(
+      context: context,
+      initialStartDate: _startDate,
+      initialEndDate: _endDate,
+    );
+
+    if (result != null) {
+      setState(() {
+        _startDate = result['startDate'];
+        _endDate = result['endDate'];
+        _isDateFilterActive = _startDate != null && _endDate != null;
+      });
+
+      // (Tùy chọn) Gọi hàm filter theo ngày ở đây nếu cần
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.only(
+          left: 16,
+          top: 16,
+          right: 16,
+        ),
         child: Column(
           children: [
             // Header row
@@ -97,9 +101,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 const AIDropdownSelector(),
                 const SizedBox(width: 8),
                 OutlinedButton.icon(
-                  onPressed: () {
-                    // TODO: Handle Date filter
-                  },
+                  onPressed: _handleOpenDatePicker,
                   icon: const Icon(Icons.calendar_today, size: 18),
                   label: const Text(
                     'Date',
@@ -109,36 +111,46 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    side: BorderSide(color: Colors.grey.shade300),
+                    side: BorderSide(
+                      color: _isDateFilterActive
+                          ? Theme.of(context).primaryColor
+                          : Colors.grey.shade300,
+                    ),
+                    backgroundColor: _isDateFilterActive
+                        ? Theme.of(context).primaryColor.withOpacity(0.1)
+                        : Colors.transparent,
+                    foregroundColor: _isDateFilterActive
+                        ? Theme.of(context).primaryColor
+                        : Colors.black87,
                     padding: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 16),
                   ),
-                ),
+                )
               ],
             ),
 
             const SizedBox(height: 12),
 
             Expanded(
-              child: ListView.builder(
-                itemCount: historyList.length,
-                itemBuilder: (context, index) {
-                  final item = historyList[index];
-                  return TitleHistoryItem(
-                    aiName: item.aiName,
-                    iconPath: item.iconPath,
-                    title: item.title,
-                    subTitle: item.subTitle,
-                    dateTime: item.dateTime,
-                    cost: item.cost,
-                    isStarred: item.isStarred,
-                    onTap: () {
-                      // xử lý khi bấm vào item
+              child: Obx(() => ListView.builder(
+                    itemCount: controller.historyList.length,
+                    itemBuilder: (context, index) {
+                      final item = controller.historyList[index];
+                      return TitleHistoryItem(
+                        aiName: item.aiName,
+                        iconPath: item.iconPath,
+                        title: item.title,
+                        subTitle: item.subTitle,
+                        dateTime: item.dateTime,
+                        cost: item.cost,
+                        isStarred: item.isStarred,
+                        onTap: () {
+                          // xử lý khi bấm vào item
+                        },
+                        onStarToggle: () => controller.toggleStar(index),
+                      );
                     },
-                    onStarToggle: () => toggleStar(index),
-                  );
-                },
-              ),
+                  )),
             ),
           ],
         ),

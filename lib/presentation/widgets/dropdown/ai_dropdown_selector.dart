@@ -1,3 +1,4 @@
+import 'package:ez_ai_app/core/base/dropdown/ai_option_sheet.dart';
 import 'package:ez_ai_app/data/models/quick-action/action_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -82,7 +83,19 @@ class _AIDropdownSelectorState extends State<AIDropdownSelector> {
   @override
   Widget build(BuildContext context) {
     return OutlinedButton(
-      onPressed: _showOptionSheet,
+      onPressed: () async {
+        final result = await showAIOptionSheet(
+          context: context,
+          options: options,
+          selectedOption: selectedOption,
+        );
+
+        if (result != null) {
+          setState(() {
+            selectedOption = result;
+          });
+        }
+      },
       style: OutlinedButton.styleFrom(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
